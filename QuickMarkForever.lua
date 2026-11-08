@@ -5,7 +5,7 @@
 -- A lightweight addon for quickly marking targets with raid icons
 --------------------------------------------------------------------------------
 
-local ADDON_NAME = "QuickMark"
+local ADDON_NAME = "QuickMarkForever"
 local QuickMark = {}
 local frame -- Main UI frame
 local db -- Saved variables reference
@@ -38,7 +38,7 @@ local BORDER_OPTIONS = {
 -- Helper Functions
 --------------------------------------------------------------------------------
 local function Print(msg)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99QuickMark:|r " .. tostring(msg))
+    DEFAULT_CHAT_FRAME:AddMessage("|cff33ff99QuickMark Forever:|r " .. tostring(msg))
 end
 
 local function Debug(msg)
@@ -357,7 +357,7 @@ end
 -- Blizzard Settings API
 --------------------------------------------------------------------------------
 function QuickMark:SetupSettings()
-    local category = Settings.RegisterVerticalLayoutCategory("QuickMark")
+    local category = Settings.RegisterVerticalLayoutCategory("QuickMark Forever")
     settingsCategory = category
 
     -- Lock checkbox
