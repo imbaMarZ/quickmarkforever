@@ -28,10 +28,10 @@ A lightweight World of Warcraft Forever addon that provides a convenient, dragga
 
 1. Download the latest release from GitHub.
 2. Extract the archive.
-3. Copy the addon files into a folder named `QuickMark` inside your World of Warcraft Forever `Interface/AddOns/` directory.
+3. Copy the addon files into a folder named `QuickMarkForever` inside your World of Warcraft Forever `Interface/AddOns/` directory.
 4. Restart World of Warcraft or type `/reload` in-game.
 
-Make sure `QuickMark.toc` is located directly inside the `QuickMark` folder.
+Make sure `QuickMarkForever.toc` is located directly inside the `QuickMarkForever` folder.
 
 ## Usage
 
@@ -71,7 +71,7 @@ The selected order is saved per character and restored after logging in.
 Access the full settings panel via:
 
 - Type `/qm` or `/quickmark`
-- Press **ESC → Options → AddOns → QuickMark**
+- Press **ESC → Options → AddOns → QuickMark Forever**
 
 Available settings:
 
@@ -85,7 +85,7 @@ Available settings:
 ### Marking Targets
 
 1. Select a target.
-2. Click any raid icon on the QuickMark bar.
+2. Click any raid icon on the QuickMark Forever bar.
 3. The selected raid marker is applied to your target.
 
 Raid markers are applied using secure WoW actions.
@@ -110,8 +110,8 @@ Raid markers are applied using secure WoW actions.
 
 ```
 quickmarkforever/
-├── QuickMark.lua       # Main addon code
-├── QuickMark.toc       # Addon metadata
+├── QuickMarkForever.lua       # Main addon code
+├── QuickMarkForever.toc       # Addon metadata
 ├── LICENSE.txt         # Apache 2.0 License
 ├── README.md           # This file
 ├── CLAUDE.md           # Development guidelines for AI assistants
@@ -125,7 +125,7 @@ None. QuickMark Forever uses only native WoW APIs with no external libraries.
 
 ### Building
 
-No build process is required. The addon is ready to use as-is. Simply copy the addon files into your AddOns directory inside a folder named `QuickMark`.
+No build process is required. The addon is ready to use as-is. Simply copy the addon files into your AddOns directory inside a folder named `QuickMarkForever`.
 
 ### Contributing
 
