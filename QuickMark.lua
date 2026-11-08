@@ -1,5 +1,7 @@
 --------------------------------------------------------------------------------
--- QuickMark - Native WoW Addon (No Ace3)
+-- QuickMark Forever - Native WoW Addon (No Ace3)
+-- Modified from QuickMark by stphung for WoW Forever (Interface 16001).
+-- Changes: secure raid target buttons and /qm inv marker order.
 -- A lightweight addon for quickly marking targets with raid icons
 --------------------------------------------------------------------------------
 
@@ -10,6 +12,7 @@ local db -- Saved variables reference
 
 local DEBUG = false
 local settingsCategory = nil
+local pendingLayout = false
 
 --------------------------------------------------------------------------------
 -- Constants
@@ -87,7 +90,7 @@ local function CreateQuickMarkFrame()
     local iconSize = 20
     local spacing = 5
     for i = 1, 8 do
-        local btn = CreateFrame("Button", nil, f)
+        local btn = CreateFrame("Button", nil, f, "SecureActionButtonTemplate")
         btn:SetSize(iconSize, iconSize)
         btn:SetPoint("LEFT", 12 + (i-1) * (iconSize + spacing), 0)
 
@@ -95,13 +98,17 @@ local function CreateQuickMarkFrame()
         texture:SetAllPoints()
         texture:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcon_" .. i)
 
-        btn:SetScript("OnClick", function()
-            if GetRaidTargetIndex("target") == i then
-                SetRaidTarget("target", 0)
-            else
-                SetRaidTarget("target", i)
-            end
-        end)
+        -- Secure action: direct SetRaidTarget() is restricted in WoW Forever.
+        -- Attributes are assigned once, outside combat; icon i always marks i.
+        btn:RegisterForClicks("AnyUp")
+        btn:SetAttribute("useOnKeyDown", false)
+        btn:SetAttribute("type1", "raidtarget")
+        btn:SetAttribute("*type1", "raidtarget")
+        btn:SetAttribute("marker", i)
+        btn:SetAttribute("action", "set")
+        btn:SetAttribute("unit", "target")
+        btn:SetAttribute("checkselfcast", false)
+        btn:SetAttribute("checkfocuscast", false)
 
         f.icons[i] = btn
     end
@@ -112,34 +119,48 @@ end
 --------------------------------------------------------------------------------
 -- Layout Functions
 --------------------------------------------------------------------------------
-function QuickMark:SetHorizontalLayout()
-    local iconSize = 20
-    local spacing = 5
-
-    frame:SetSize(230, 48)
-
-    for i = 1, 8 do
-        frame.icons[i]:ClearAllPoints()
-        frame.icons[i]:SetPoint("LEFT", 12 + (i-1) * (iconSize + spacing), 0)
+-- Protected button positions cannot be modified in combat.
+-- Reverse the visual order, not the marker IDs or secure attributes.
+function QuickMark:ApplyLayout()
+    if InCombatLockdown() then
+        pendingLayout = true
+        return
     end
+    pendingLayout = false
+    local iconSize, spacing = 20, 5
+    frame:SetSize(db.horizontal and 230 or 48, db.horizontal and 48 or 230)
+    for i = 1, 8 do
+        local position = db.inverted and (8 - i) or (i - 1)
+        local button = frame.icons[i]
+        button:ClearAllPoints()
+        if db.horizontal then
+            button:SetPoint("LEFT", 12 + position * (iconSize + spacing), 0)
+        else
+            button:SetPoint("TOP", 0, -12 - position * (iconSize + spacing))
+        end
+    end
+end
 
+function QuickMark:SetHorizontalLayout()
     db.horizontal = true
+    self:ApplyLayout()
     Debug("Horizontal Layout")
 end
 
 function QuickMark:SetVerticalLayout()
-    local iconSize = 20
-    local spacing = 5
-
-    frame:SetSize(48, 230)
-
-    for i = 1, 8 do
-        frame.icons[i]:ClearAllPoints()
-        frame.icons[i]:SetPoint("TOP", 0, -12 - (i-1) * (iconSize + spacing))
-    end
-
     db.horizontal = false
+    self:ApplyLayout()
     Debug("Vertical Layout")
+end
+
+function QuickMark:InvertMarkerOrder()
+    db.inverted = not db.inverted
+    self:ApplyLayout()
+    if pendingLayout then
+        Print("Marker order will change after combat.")
+    else
+        Print("Marker order: " .. (db.inverted and "inverted" or "default"))
+    end
 end
 
 function QuickMark:GetHorizontal()
@@ -393,6 +414,25 @@ function QuickMark:SetupSettings()
         Settings.CreateCheckbox(category, setting, tooltip)
     end
 
+    -- Invert marker order checkbox
+    do
+        local variable = "inverted"
+        local name = "Invert Marker Order"
+        local tooltip = "Reverse the order of the raid marker icons (Skull to Star)."
+        local defaultValue = false
+
+        local setting = Settings.RegisterAddOnSetting(category, "QuickMark_Inverted", variable, db, type(defaultValue), name, defaultValue)
+        setting:SetValueChangedCallback(function(_, value)
+            -- The Settings API already updates db.inverted. Only refresh positions;
+            -- calling InvertMarkerOrder() here would toggle the value a second time.
+            QuickMark:ApplyLayout()
+            if pendingLayout then
+                Print("Marker order will change after combat.")
+            end
+        end)
+        Settings.CreateCheckbox(category, setting, tooltip)
+    end
+
     -- Scale slider
     do
         local variable = "scale"
@@ -494,6 +534,7 @@ local function InitializeDatabase()
     -- Set defaults if not already set
     if db.scale == nil then db.scale = DEFAULT_SCALE end
     if db.horizontal == nil then db.horizontal = false end
+    if db.inverted == nil then db.inverted = false end
     if db.locked == nil then db.locked = false end
     if db.hidden == nil then db.hidden = false end
     if db.edge_file == nil then db.edge_file = DEFAULT_EDGE_FILE end
@@ -550,6 +591,8 @@ SlashCmdList["QUICKMARK"] = function(msg)
         QuickMark:SetHorizontalLayout()
     elseif cmd == "vertical" or cmd == "vert" then
         QuickMark:SetVerticalLayout()
+    elseif cmd == "inv" then
+        QuickMark:InvertMarkerOrder()
     else
         if settingsCategory then
             Settings.OpenToCategory(settingsCategory:GetID())
@@ -564,11 +607,14 @@ local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
 eventFrame:RegisterEvent("PLAYER_LOGOUT")
+eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventFrame:SetScript("OnEvent", function(self, event, arg1)
     if event == "ADDON_LOADED" and arg1 == ADDON_NAME then
         QuickMark:OnInitialize()
     elseif event == "PLAYER_LOGIN" then
         QuickMark:OnEnable()
+    elseif event == "PLAYER_REGEN_ENABLED" and pendingLayout then
+        QuickMark:ApplyLayout()
     elseif event == "PLAYER_LOGOUT" then
         QuickMark:OnDisable()
     end

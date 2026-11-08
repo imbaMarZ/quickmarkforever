@@ -1,8 +1,8 @@
-## Interface: 110205,120000
-## Title: QuickMark
+## Interface: 16001
+## Title: QuickMark Forever
 ## Notes: QuickMark allows you to set the raid target icon of units quickly rather than having to go through the right-click menu or create keybindings.
-## Author: stphung
-## Version: 3.0
+## Author: stphung (original); QuickMark Forever contributors
+## Version: 3.0.0-forever.1
 ## SavedVariablesPerCharacter: QuickMarkDB
 
 QuickMark.lua
