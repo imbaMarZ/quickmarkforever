@@ -2,7 +2,7 @@
 ## Title: QuickMark Forever
 ## Notes: Quickly mark targets with raid icons using a customizable bar.
 ## Author: stphung (original); imbaMarZ
-## Version: 1.0.0-forever
+## Version: 1.1.0-forever
 ## SavedVariablesPerCharacter: QuickMarkDB
 
 QuickMarkForever.lua

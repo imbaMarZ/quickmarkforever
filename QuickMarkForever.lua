@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- QuickMark Forever - Native WoW Addon (No Ace3)
 -- Modified from QuickMark by stphung for WoW Forever (Interface 16001).
--- Changes: secure raid target buttons and /qm inv marker order.
+-- Changes: secure raid target buttons, /qm inv, background opacity and hover drag handle.
 -- A lightweight addon for quickly marking targets with raid icons
 --------------------------------------------------------------------------------
 
@@ -82,6 +82,58 @@ local function CreateQuickMarkFrame()
         self:StopMovingOrSizing()
         QuickMark:SavePosition()
     end)
+
+    -- Small drag handle, shown on mouseover only while unlocked.
+    -- Kept outside the icon area so secure marker clicks are unaffected.
+    local handle = CreateFrame("Frame", nil, f, "BackdropTemplate")
+    handle:SetSize(42, 14)
+    handle:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 3, -2)
+    handle:SetFrameLevel(f:GetFrameLevel() + 5)
+    handle:EnableMouse(true)
+    handle:RegisterForDrag("LeftButton")
+    handle:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        edgeSize = 8, insets = { left = 2, right = 2, top = 2, bottom = 2 } })
+    handle:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
+    handle:SetBackdropBorderColor(0.7, 0.7, 0.7, 0.9)
+    local grip = handle:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    grip:SetPoint("CENTER", 0, 0)
+    grip:SetText("::::")
+    handle:Hide()
+    handle.dragging = false
+    handle:SetScript("OnDragStart", function(self)
+        if not db or db.locked then return end
+        self.dragging = true
+        f:StartMoving()
+    end)
+    handle:SetScript("OnDragStop", function(self)
+        if not self.dragging then return end
+        f:StopMovingOrSizing()
+        self.dragging = false
+        QuickMark:SavePosition()
+    end)
+    -- Keep the handle visible briefly while the cursor moves from the bar
+    -- to the handle. Never hide it during an active drag.
+    local hideDelay = 0
+    f:SetScript("OnUpdate", function(self, elapsed)
+        if not db or db.locked then
+            hideDelay = 0
+            if handle:IsShown() then handle:Hide() end
+            return
+        end
+        local hovering = self:IsMouseOver() or handle:IsMouseOver()
+        if hovering or handle.dragging then
+            hideDelay = 0
+            if not handle:IsShown() then handle:Show() end
+        elseif handle:IsShown() then
+            hideDelay = hideDelay + elapsed
+            if hideDelay >= 0.3 then
+                handle:Hide()
+                hideDelay = 0
+            end
+        end
+    end)
+    f.dragHandle = handle
 
     -- Container for icons
     f.icons = {}
@@ -194,6 +246,7 @@ function QuickMark:Lock()
     frame:SetMovable(false)
     frame:EnableMouse(false)
     db.locked = true
+    if frame.dragHandle then frame.dragHandle:Hide() end
     Debug("Locked")
 end
 
@@ -449,6 +502,24 @@ function QuickMark:SetupSettings()
         end)
 
         local options = Settings.CreateSliderOptions(minValue, maxValue, step)
+        options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
+            return string.format("%.0f%%", value * 100)
+        end)
+        Settings.CreateSlider(category, setting, options, tooltip)
+    end
+
+    -- Background opacity slider (0% = invisible, 100% = opaque).
+    -- Preserve the original 30% default for existing installations.
+    do
+        local variable = "bg_color_a"
+        local name = "Background Opacity"
+        local tooltip = "Adjust the opacity of the bar background without changing the icons or border."
+        local defaultValue = DEFAULT_A
+        local setting = Settings.RegisterAddOnSetting(category, "QuickMark_BackgroundOpacity", variable, db, type(defaultValue), name, defaultValue)
+        setting:SetValueChangedCallback(function(_, value)
+            QuickMark:BackgroundColor(db.bg_color_r, db.bg_color_g, db.bg_color_b, value)
+        end)
+        local options = Settings.CreateSliderOptions(0, 1, 0.05)
         options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
             return string.format("%.0f%%", value * 100)
         end)
