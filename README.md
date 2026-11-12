@@ -1,26 +1,30 @@
 # QuickMark Forever
 
 > [!NOTE]
-> **QuickMark Forever** is a continuation of [QuickMark](https://github.com/stphung/quickmark) by [**stphung**](https://github.com/stphung), adapted for World of Warcraft Forever (Interface 16001).
+> **QuickMark Forever** is a continuation of [QuickMark](https://github.com/stphung/quickmark) by [**stphung**](https://github.com/stphung).
 >
-> The addon restores click-to-mark functionality using secure raid target actions instead of direct `SetRaidTarget()` calls.
+> Originally developed to restore QuickMark functionality for **World of Warcraft Forever (Interface 16001)**, the addon has since been confirmed to work with **WoW Retail (Midnight), WoW Classic, WoW Classic: Mists of Pandaria, and WoW Burning Crusade Anniversary**.
+>
+> QuickMark Forever restores click-to-mark functionality using secure raid target actions instead of direct `SetRaidTarget()` calls.
 
-A lightweight World of Warcraft Forever addon that provides a convenient, draggable interface for quickly marking targets with raid icons.
+A lightweight World of Warcraft addon that provides a convenient, customizable and draggable interface for quickly marking targets with raid icons.
 
 ## Features
 
 - **Quick Access Bar**: Floating bar with all 8 raid target icons (Star, Circle, Diamond, Triangle, Moon, Square, Cross, Skull)
-- **One-Click Marking**: Click an icon to mark your current target using secure raid target actions
+- **One-Click Marking**: Click an icon to mark your current target using secure raid target actions, including during combat
 - **Invert Marker Order**: Reverse the order of raid icons using `/qm inv` or the settings panel
 - **Flexible Layout**: Toggle between horizontal and vertical orientations
 - **Fully Customizable**:
-  - Adjustable scale (10% - 500%)
+  - Adjustable scale (10%–500%)
   - Multiple border styles (Classic, Slick, Wood, Hefty, Graphite, or None)
-  - Configurable background color and opacity
+  - Adjustable background opacity (0%–100%)
+  - Mouseover drag handle for easy repositioning when unlocked
   - Lock/unlock to prevent accidental movement
   - Show/hide as needed
 - **Position Memory**: Remembers your bar position per character
-- **Blizzard Settings Integration**: Full settings panel accessible via ESC menu
+- **Blizzard Settings Integration**: Full settings panel accessible via the ESC menu
+- **Multi-Client Compatibility**: Works with multiple WoW versions using the same addon codebase
 
 ## Installation
 
@@ -28,10 +32,8 @@ A lightweight World of Warcraft Forever addon that provides a convenient, dragga
 
 1. Download the latest release from GitHub.
 2. Extract the archive.
-3. Copy the addon files into a folder named `QuickMarkForever` inside your World of Warcraft Forever `Interface/AddOns/` directory.
+3. Copy the addon files into a folder named `QuickMarkForever` inside the `Interface/AddOns/` directory of your WoW installation.
 4. Restart World of Warcraft or type `/reload` in-game.
-
-Make sure `QuickMarkForever.toc` is located directly inside the `QuickMarkForever` folder.
 
 ## Usage
 
@@ -81,6 +83,9 @@ Available settings:
 - **Invert Marker Order**: Reverse the order of raid target icons
 - **Scale**: Adjust size from 10% to 500%
 - **Border**: Choose from multiple border styles
+- **Background Opacity**: Adjust background transparency from 0% to 100%
+
+When the bar is unlocked, a mouseover drag handle allows repositioning even when the background is fully transparent or the border is disabled.
 
 ### Marking Targets
 
@@ -88,7 +93,7 @@ Available settings:
 2. Click any raid icon on the QuickMark Forever bar.
 3. The selected raid marker is applied to your target.
 
-Raid markers are applied using secure WoW actions.
+Raid markers are applied using secure WoW actions, allowing marking during combat where permitted by the game.
 
 **Note:** Clicking the same icon again does not currently remove the marker.
 
@@ -96,14 +101,37 @@ Raid markers are applied using secure WoW actions.
 
 ### Compatibility
 
-- **World of Warcraft Forever**: Interface 16001
+QuickMark Forever was originally developed for **World of Warcraft Forever** but has since been expanded to support additional WoW clients.
+
+**Tested and supported:**
+
+| WoW Version | Interface | Status |
+|---|---|---|
+| WoW Retail (Midnight 12.x) | `120105` | Tested |
+| WoW Classic (including Hardcore) | `11509` | Tested |
+| WoW Classic: Mists of Pandaria | `50504` | Tested |
+| WoW Burning Crusade Anniversary | `20506` | Tested |
+| WoW Forever | `16001` | Tested |
+
+**Potential compatibility (not tested):**
+
+| WoW Version | Interface | Status |
+|---|---|---|
+| WoW Titan Reforged | `38002` | Untested – may work |
+
+The addon uses a shared Lua codebase across supported clients.
+
+Compatibility with Titan Reforged is considered possible due to the use of native WoW APIs and secure raid target actions, but has **not been verified in-game**.
 
 ### Changes from Original QuickMark
 
-- Updated compatibility for WoW Forever (Interface 16001)
+- Originally adapted QuickMark for WoW Forever (Interface 16001)
+- Expanded compatibility to WoW Retail, Classic, Mists of Pandaria Classic and Burning Crusade Anniversary
 - Replaced direct `SetRaidTarget()` calls with secure raid target buttons using `SecureActionButtonTemplate`
 - Added `/qm inv` to reverse the raid marker order
 - Added an **Invert Marker Order** checkbox to the settings panel
+- Added adjustable background opacity (0%–100%)
+- Added a mouseover drag handle for easier repositioning
 - Preserved the original interface, customization options and settings
 
 ### Project Structure
@@ -112,11 +140,9 @@ Raid markers are applied using secure WoW actions.
 quickmarkforever/
 ├── QuickMarkForever.lua       # Main addon code
 ├── QuickMarkForever.toc       # Addon metadata
-├── LICENSE.txt         # Apache 2.0 License
-├── README.md           # This file
-├── CLAUDE.md           # Development guidelines for AI assistants
-├── CHANGES.txt         # Version history
-└── .gitignore          # Git ignore rules
+├── LICENSE.txt                # Apache 2.0 License
+├── README.md                  # This file
+└── .gitignore                 # Git ignore rules
 ```
 
 ### Dependencies
@@ -137,7 +163,6 @@ When contributing:
 2. Check for Lua errors using `/console scriptErrors 1`.
 3. Follow the existing code style and patterns.
 4. Ensure settings persist across reloads and game restarts.
-5. See `CLAUDE.md` for additional development guidelines.
 
 ### WoW API Reference
 
@@ -160,6 +185,6 @@ Original copyright and license notices are retained.
 
 Special thanks to **stphung** for creating the original QuickMark addon and for all the work put into its development.
 
-If stphung ever wishes to resume development of QuickMark for WoW Forever, he is welcome to contact me. I'd be happy to discuss the future of the project.
+If stphung ever wishes to resume development of QuickMark, he is welcome to contact me. I'd be happy to discuss the future of the project, including the possibility of merging improvements back into the original addon.
 
 This project is not affiliated with or endorsed by the original author or Blizzard Entertainment.

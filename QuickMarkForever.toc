@@ -1,8 +1,8 @@
-## Interface: 16001
+## Interface: 11509, 16001, 20506, 38002, 50504, 120105
 ## Title: QuickMark Forever
 ## Notes: Quickly mark targets with raid icons using a customizable bar.
-## Author: stphung (original); imbaMarZ
-## Version: 1.1.0-forever
+## Author: stphung (original); imbaMarZ (Forever)
+## Version: 1.2.0-forever
 ## SavedVariablesPerCharacter: QuickMarkDB
 
 QuickMarkForever.lua
