@@ -165,6 +165,22 @@ local function CreateQuickMarkFrame()
         f.icons[i] = btn
     end
 
+    -- Blizzard's red "pass" symbol is used for clearing the current target marker.
+    local clearButton = CreateFrame("Button", nil, f, "SecureActionButtonTemplate")
+    clearButton:SetSize(iconSize, iconSize)
+    local clearTexture = clearButton:CreateTexture(nil, "ARTWORK")
+    clearTexture:SetAllPoints()
+    clearTexture:SetTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
+    clearButton:RegisterForClicks("AnyUp")
+    clearButton:SetAttribute("useOnKeyDown", false)
+    clearButton:SetAttribute("type1", "raidtarget")
+    clearButton:SetAttribute("*type1", "raidtarget")
+    clearButton:SetAttribute("action", "clear")
+    clearButton:SetAttribute("unit", "target")
+    clearButton:SetAttribute("checkselfcast", false)
+    clearButton:SetAttribute("checkfocuscast", false)
+    f.clearButton = clearButton
+
     return f
 end
 
@@ -180,9 +196,17 @@ function QuickMark:ApplyLayout()
     end
     pendingLayout = false
     local iconSize, spacing = 20, 5
-    frame:SetSize(db.horizontal and 230 or 48, db.horizontal and 48 or 230)
+    frame:SetSize(db.horizontal and 255 or 48, db.horizontal and 48 or 255)
+    -- Clear stays adjacent to Star in either marker order.
+    local clearPosition = db.inverted and 8 or 0
+    frame.clearButton:ClearAllPoints()
+    if db.horizontal then
+        frame.clearButton:SetPoint("LEFT", 12 + clearPosition * (iconSize + spacing), 0)
+    else
+        frame.clearButton:SetPoint("TOP", 0, -12 - clearPosition * (iconSize + spacing))
+    end
     for i = 1, 8 do
-        local position = db.inverted and (8 - i) or (i - 1)
+        local position = db.inverted and (8 - i) or i
         local button = frame.icons[i]
         button:ClearAllPoints()
         if db.horizontal then
